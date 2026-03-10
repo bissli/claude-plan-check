@@ -1,0 +1,8 @@
+{
+  "name": "plan-check",
+  "description": "Plan validation using parallel specialized agents for gap analysis, code impact, risk assessment, and checklist review",
+  "version": "1.0.0",
+  "author": {
+    "name": "bissli"
+  }
+}
