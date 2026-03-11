@@ -8,7 +8,7 @@ Add the marketplace and install:
 
 ```
 /plugin marketplace add bissli/claude-plan-check
-/plugin install plan-check@bissli-claude-plan-check
+/plugin install plan-check@claude-plan-check
 ```
 
 For local development:
@@ -84,6 +84,29 @@ Key differences in v2:
 - All severity levels are addressed (Low through Critical), not just reported
 - New agents: plan-verifier (VFY), breakage-analyst (BRK), test-reviewer (TST), simplification-analyst (SMP)
 - Removed agents: gap-analyst (GAP), code-impact-analyst (IMP), feasibility-risk-analyst (RSK)
+
+## Uninstallation
+
+To fully remove the plugin:
+
+1. Disable the plugin in Claude Code:
+   ```
+   /plugin uninstall plan-check@claude-plan-check
+   ```
+
+2. Remove the marketplace registration:
+   ```
+   /plugin marketplace remove claude-plan-check
+   ```
+
+3. Delete the cached plugin files:
+   ```bash
+   rm -rf ~/.claude/plugins/cache/claude-plan-check
+   ```
+
+4. Verify removal -- open `~/.claude/settings.json` and confirm:
+   - `"plan-check@claude-plan-check"` is gone from `enabledPlugins`
+   - `"claude-plan-check"` is gone from `extraKnownMarketplaces`
 
 ## License
 
