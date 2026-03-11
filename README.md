@@ -1,6 +1,6 @@
 # claude-plan-check
 
-A Claude Code plugin that validates implementation plans using 4 parallel specialized agents.
+A Claude Code plugin that validates implementation plans using parallel specialized agents and **edits the plan directly** to address all findings.
 
 ## Installation
 
@@ -19,51 +19,71 @@ claude --plugin-dir ./claude-plan-check
 
 ## Usage
 
-Three subcommands are available:
+Four subcommands are available:
 
 ```
-/plan-check:all        # Full validation: 4 agents + checklist
-/plan-check:review     # Analysis only: 3 agents (gaps, impact, risks)
-/plan-check:checklist  # Checklist only: evaluate and generate checklist
+/plan-check:verify     # Verify correctness, completeness, assumptions
+/plan-check:gap        # Analyze what existing code might break
+/plan-check:checklist  # Add or improve an implementation checklist
+/plan-check:deep       # Deep analysis: all 4 agents in parallel
 ```
 
-Reads the most recent plan from `~/.claude/plans/`. If no plan file is found, falls back to extracting plan text from conversation context.
+Reads the most recent plan from `~/.claude/plans/`. If no plan file is found, falls back to extracting plan text from conversation context. When the plan comes from conversation context, the amended plan is written to `~/.claude/plans/amended-plan.md`.
 
-## What It Does
+## How It Works
 
-The `/plan-check:all` command runs a 5-step validation pipeline:
+Every command follows the same pattern:
 
-1. **Context gathering** (Haiku) -- reads project rules, CLAUDE.md files, and the plan
-2. **Scope analysis** (Haiku) -- builds a file manifest and finds related patterns
-3. **Parallel validation** (4 Sonnet agents) -- deep analysis across 4 dimensions
-4. **Confidence scoring** (Haiku) -- re-evaluates low-confidence findings, deduplicates
-5. **Synthesis** -- produces a structured validation report
+1. **Context gathering** (Haiku) -- reads project rules, CLAUDE.md files, and locates the plan file
+2. **Scope analysis** (Haiku) -- builds a file manifest, reads existing files, maps callers
+3. **Agent analysis** (Sonnet) -- specialized agents analyze the plan and return findings with plan amendments
+4. **Update plan** -- the orchestrating command applies all amendments directly to the plan file
 
-`/plan-check:review` runs steps 1-2 with 3 analysis agents (no checklist). `/plan-check:checklist` runs steps 1-2 with the checklist agent only.
+The updated plan IS the deliverable. No standalone report is produced.
+
+### Commands
+
+**`/plan-check:verify`** launches the plan-verifier agent for correctness, completeness, edge cases, error handling, assumptions, test quality, and knowledge coverage.
+
+**`/plan-check:gap`** launches the breakage-analyst agent to trace callers, detect interface changes, import cascades, shared state issues, and recommend regression tests.
+
+**`/plan-check:checklist`** launches the checklist-architect agent to evaluate or create an implementation checklist, then inserts it into the plan.
+
+**`/plan-check:deep`** is the most thorough analysis. It launches all 4 agents in parallel (plan-verifier, breakage-analyst, test-reviewer, simplification-analyst), deduplicates findings, then runs a second wave of Haiku agents to re-evaluate Critical and High findings. All confirmed amendments are applied to the plan.
 
 ## Agents
 
-| Agent                        | Prefix | Focus                                                                                                |
-| ---------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| **gap-analyst**              | GAP    | Missing steps, edge cases, implicit assumptions, error handling, backward compat, knowledge coverage |
-| **code-impact-analyst**      | IMP    | Dependency breakage, side effects, refactoring opportunities                                         |
-| **feasibility-risk-analyst** | RSK    | Technical feasibility, performance, security, risk matrix                                            |
-| **checklist-architect**      | CHK    | Checklist structure, completeness, item quality, phase ordering                                      |
+| Agent                      | Prefix | Color   | Focus                                                              |
+| -------------------------- | ------ | ------- | ------------------------------------------------------------------ |
+| **plan-verifier**          | VFY    | yellow  | Correctness, completeness, edge cases, assumptions, test quality   |
+| **breakage-analyst**       | BRK    | red     | Caller breakage, interface changes, import cascades, test breakage |
+| **test-reviewer**          | TST    | cyan    | Test coverage, proposed test quality, missing scenarios, smells    |
+| **simplification-analyst** | SMP    | magenta | Code reuse, over-engineering, pattern conformance, consolidation   |
+| **checklist-architect**    | CHK    | green   | Checklist structure, completeness, item quality, phase ordering    |
 
-## Output
+## Plan Amendment Model
 
-The full report (`/plan-check:all`) includes:
+Agents are read-only -- they analyze the codebase and return structured findings with plan amendments. The orchestrating command (the main Claude thread) collects amendments and edits the plan file.
 
-- **Overall Assessment** -- Pass / Pass with Warnings / Needs Revision
-- **Critical and High Issues** -- must address before implementation
-- **Medium and Low Issues** -- recommended improvements
-- **Refactoring Opportunities** -- existing code the plan should leverage
-- **Risk Assessment** -- overall risk level, blast radius, top 3 risks
-- **Implementation Checklist** -- validated/improved, phased with dependencies
+Each amendment specifies an operation (`add`, `replace`, `remove`, or `append-section`), a target location in the plan, and the content to apply. Amendments are processed in severity order (Critical first). Conflicts between amendments targeting the same section are resolved by applying the higher-severity amendment.
 
 ## Confidence Threshold
 
-Findings below 60% confidence are filtered out (lower than code-review's 80% threshold because fixing a plan is cheap -- surface more marginal findings).
+In `/plan-check:deep`, the second wave of Haiku agents re-evaluates Critical and High findings. Findings below 60% confidence are filtered out after the second wave.
+
+## Migration from v1
+
+| v1 Command              | v2 Equivalent                            |
+| ----------------------- | ---------------------------------------- |
+| `/plan-check:all`       | `/plan-check:deep`                       |
+| `/plan-check:review`    | `/plan-check:verify` + `/plan-check:gap` |
+| `/plan-check:checklist` | `/plan-check:checklist` (rewritten)      |
+
+Key differences in v2:
+- Commands edit the plan file directly instead of producing standalone reports
+- All severity levels are addressed (Low through Critical), not just reported
+- New agents: plan-verifier (VFY), breakage-analyst (BRK), test-reviewer (TST), simplification-analyst (SMP)
+- Removed agents: gap-analyst (GAP), code-impact-analyst (IMP), feasibility-risk-analyst (RSK)
 
 ## License
 
