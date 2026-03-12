@@ -34,16 +34,15 @@ Reads the most recent plan from `~/.claude/plans/`. If no plan file is found, fa
 
 Every command follows the same pattern:
 
-1. **Context gathering** (Haiku) -- reads project rules, CLAUDE.md files, and locates the plan file
-2. **Scope analysis** (Haiku) -- builds a file manifest, reads existing files, maps callers
-3. **Agent analysis** (Sonnet) -- specialized agents analyze the plan and return findings with plan amendments
-4. **Update plan** -- the orchestrating command applies all amendments directly to the plan file
+1. **Find the plan** -- the parent session locates the most recent plan file (or extracts from conversation)
+2. **Agent analysis** (Sonnet) -- specialized agents receive the plan text and read source files directly as needed, returning findings with plan amendments
+3. **Update plan** -- the orchestrating command applies all amendments directly to the plan file
 
 The updated plan IS the deliverable. No standalone report is produced.
 
 ### Commands
 
-**`/plan-check:verify`** launches the plan-verifier agent for correctness, completeness, edge cases, error handling, assumptions, test quality, and knowledge coverage.
+**`/plan-check:verify`** launches the plan-verifier agent for correctness, completeness, edge cases, error handling, assumptions, and test quality.
 
 **`/plan-check:gap`** launches the breakage-analyst agent to trace callers, detect interface changes, import cascades, shared state issues, and recommend regression tests.
 
