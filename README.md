@@ -46,13 +46,13 @@ The updated plan IS the deliverable. No standalone report is produced.
 
 ## Agents
 
-| Agent                      | Prefix | Color   | Focus                                                              |
-| -------------------------- | ------ | ------- | ------------------------------------------------------------------ |
-| **plan-verifier**          | VFY    | yellow  | Correctness, completeness, edge cases, assumptions, test quality   |
-| **breakage-analyst**       | BRK    | red     | Caller breakage, interface changes, import cascades, test breakage |
-| **test-reviewer**          | TST    | cyan    | Test coverage, proposed test quality, missing scenarios, smells    |
-| **simplification-analyst** | SMP    | magenta | Code reuse, over-engineering, pattern conformance, consolidation   |
-| **precedent-scanner**      | PRC    | blue    | Codebase precedent, approach divergence, bidirectional improvement |
+| Agent                      | Prefix | Color  | Focus                                                              |
+| -------------------------- | ------ | ------ | ------------------------------------------------------------------ |
+| **plan-verifier**          | VFY    | yellow | Correctness, completeness, edge cases, assumptions, test quality   |
+| **breakage-analyst**       | BRK    | red    | Caller breakage, interface changes, import cascades, test breakage |
+| **test-reviewer**          | TST    | cyan   | Test coverage, proposed test quality, missing scenarios, smells    |
+| **simplification-analyst** | SMP    | purple | Code reuse, over-engineering, pattern conformance, consolidation   |
+| **precedent-scanner**      | PRC    | blue   | Codebase precedent, approach divergence, bidirectional improvement |
 
 ## Plan Amendment Model
 

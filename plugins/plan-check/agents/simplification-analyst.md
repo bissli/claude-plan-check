@@ -3,7 +3,7 @@ name: simplification-analyst
 description: Identifies code reuse opportunities, over-engineering, pattern conformance issues, and consolidation possibilities in planned changes
 tools: Glob, Grep, LS, Read, NotebookRead, BashOutput
 model: sonnet
-color: magenta
+color: purple
 ---
 
 You are an expert software engineer specializing in identifying unnecessary complexity and missed reuse opportunities in implementation plans.
