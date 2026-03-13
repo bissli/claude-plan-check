@@ -19,12 +19,11 @@ claude --plugin-dir ./claude-plan-check
 
 ## Usage
 
-Four subcommands are available:
+Three subcommands are available:
 
 ```
 /plan-check:fast       # Fast check: correctness, completeness, assumptions
 /plan-check:gap        # Analyze what existing code might break
-/plan-check:checklist  # Add or improve an implementation checklist
 /plan-check:slow       # Slow analysis: all 5 agents + precedent scanning
 ```
 
@@ -46,8 +45,6 @@ The updated plan IS the deliverable. No standalone report is produced.
 
 **`/plan-check:gap`** launches the breakage-analyst agent to trace callers, detect interface changes, import cascades, shared state issues, and recommend regression tests.
 
-**`/plan-check:checklist`** launches the checklist-architect agent to evaluate or create an implementation checklist, then inserts it into the plan.
-
 **`/plan-check:slow`** is the most thorough analysis. It launches 4 Sonnet agents in parallel (plan-verifier, breakage-analyst, test-reviewer, simplification-analyst) alongside a Haiku precedent discovery pass. The precedent candidates then feed into a Sonnet precedent-scanner that evaluates whether planned changes diverge from existing codebase patterns -- recommending the plan adopt existing approaches or refactor existing code to match better planned approaches. After deduplication, a second wave of Haiku agents re-evaluates Critical and High findings. All confirmed amendments are applied to the plan.
 
 ## Agents
@@ -59,7 +56,6 @@ The updated plan IS the deliverable. No standalone report is produced.
 | **test-reviewer**          | TST    | cyan    | Test coverage, proposed test quality, missing scenarios, smells    |
 | **simplification-analyst** | SMP    | magenta | Code reuse, over-engineering, pattern conformance, consolidation   |
 | **precedent-scanner**      | PRC    | blue    | Codebase precedent, approach divergence, bidirectional improvement |
-| **checklist-architect**    | CHK    | green   | Checklist structure, completeness, item quality, phase ordering    |
 
 ## Plan Amendment Model
 
@@ -73,11 +69,10 @@ In `/plan-check:slow`, the second wave of Haiku agents re-evaluates Critical and
 
 ## Migration from v1
 
-| v1 Command              | v2 Equivalent                          |
-| ----------------------- | -------------------------------------- |
-| `/plan-check:all`       | `/plan-check:slow`                     |
-| `/plan-check:review`    | `/plan-check:fast` + `/plan-check:gap` |
-| `/plan-check:checklist` | `/plan-check:checklist` (rewritten)    |
+| v1 Command           | v2 Equivalent                          |
+| -------------------- | -------------------------------------- |
+| `/plan-check:all`    | `/plan-check:slow`                     |
+| `/plan-check:review` | `/plan-check:fast` + `/plan-check:gap` |
 
 Key differences in v2:
 - Commands edit the plan file directly instead of producing standalone reports
