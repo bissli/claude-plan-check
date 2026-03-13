@@ -26,13 +26,13 @@ Two subcommands are available:
 /plan-check:slow       # Slow analysis: all 5 agents + precedent scanning
 ```
 
-Reads the most recent plan from `~/.claude/plans/`. If no plan file is found, falls back to extracting plan text from conversation context. When the plan comes from conversation context, the amended plan is written to `~/.claude/plans/amended-plan.md`.
+If the system prompt includes a plan file path (plan mode injects this), that path is used directly. Otherwise, reads the most recent plan from `~/.claude/plans/`. If no plan file is found, falls back to extracting plan text from conversation context. When the plan comes from conversation context, the amended plan is written to `~/.claude/plans/amended-plan.md`.
 
 ## How It Works
 
 Every command follows the same pattern:
 
-1. **Find the plan** -- the parent session locates the most recent plan file (or extracts from conversation)
+1. **Find the plan** -- the parent session finds the plan via system-prompt path, glob fallback, or conversation context
 2. **Agent analysis** (Sonnet) -- specialized agents receive the plan text and read source files directly as needed, returning findings with plan amendments
 3. **Update plan** -- the orchestrating command applies all amendments directly to the plan file
 

@@ -8,7 +8,12 @@ Run a comprehensive multi-agent analysis with precedent scanning and second-wave
 
 ## Step 1: First Wave (4 Sonnet agents + Haiku discovery, in parallel)
 
-Find the plan: glob `~/.claude/plans/*.md` and read the most recently modified file (use `stat` to compare). If no plan file found on disk, extract plan text from conversation context. Note the plan file path (or null if from conversation).
+Find the plan using this priority order:
+1. If your system prompt indicates a plan file path (e.g., "A plan file already exists at /path/to/plan.md"), use that path directly.
+2. Otherwise, glob `~/.claude/plans/*.md` and read the most recently modified file (use `stat` to compare).
+3. If no plan file found on disk, extract plan text from conversation context.
+
+Note the plan file path (or null if from conversation).
 
 Launch **all 5 tasks in parallel**, passing each the full plan text and the plan file path.
 
