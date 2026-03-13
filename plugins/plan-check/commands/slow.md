@@ -6,7 +6,7 @@ description: Slow comprehensive analysis combining verification, breakage, test 
 
 Run a comprehensive multi-agent analysis with precedent scanning and second-wave validation, then update the plan to address all findings.
 
-## Step 1: First Wave (4 Sonnet agents + Haiku discovery, in parallel)
+## Step 1: First Wave (5 Sonnet agents + Haiku discovery, in parallel)
 
 Find the plan using this priority order:
 1. If your system prompt indicates a plan file path (e.g., "A plan file already exists at /path/to/plan.md"), use that path directly.
@@ -15,7 +15,7 @@ Find the plan using this priority order:
 
 Note the plan file path (or null if from conversation).
 
-Launch **all 5 tasks in parallel**, passing each the full plan text and the plan file path.
+Launch **all 6 tasks in parallel**, passing each the full plan text and the plan file path.
 
 1. **plan-verifier** (VFY prefix): Full verification -- correctness, completeness, edge cases, error handling, assumptions. If the project has tests (glob for `test_*`, `*_test.*`, `*_spec.*`, `tests/`, `__tests__/`, `spec/` patterns), emphasize test quality.
 
@@ -25,7 +25,9 @@ Launch **all 5 tasks in parallel**, passing each the full plan text and the plan
 
 4. **simplification-analyst** (SMP prefix): Over-engineering and reuse -- code reuse opportunities, unnecessary abstractions, pattern conformance, consolidation.
 
-5. **Precedent discovery** (Haiku agent): For each file the plan proposes to create or modify, search the codebase for similar implementations. For each planned change, grep for similar function names, class names, patterns, imports, and approaches. Build a candidate list pairing each planned change with existing codebase locations that solve similar problems. Return the candidate list with file paths and brief descriptions of each existing approach.
+5. **data-analyst** (DAT prefix): If the plan references or implies a database or data store, check whether adequate data analysis (before/after impact, schema inspection, affected row counts, etc.) has already been performed. If gaps exist, run read-only queries to fill them. If the plan has no database involvement, return no findings.
+
+6. **Precedent discovery** (Haiku agent): For each file the plan proposes to create or modify, search the codebase for similar implementations. For each planned change, grep for similar function names, class names, patterns, imports, and approaches. Build a candidate list pairing each planned change with existing codebase locations that solve similar problems. Return the candidate list with file paths and brief descriptions of each existing approach.
 
 ## Step 2: Precedent Analysis (Sonnet agent)
 
@@ -42,7 +44,7 @@ The agent returns findings in PRC-NNN format with plan amendments.
 
 ## Step 3: Collection + Deduplication
 
-After all 5 analysis agents complete (4 from Step 1 + precedent-scanner from Step 2):
+After all 6 analysis agents complete (5 from Step 1 + precedent-scanner from Step 2):
 
 1. Collect all findings from all agents into a single list
 2. **Deduplicate**: if two agents flagged the same underlying issue, merge into one finding keeping the highest confidence and richest evidence. Note which agents flagged it. Pay particular attention to overlap between SMP (code reuse) and PRC (missed reuse / divergence) findings.
@@ -73,6 +75,7 @@ After all second-wave agents complete:
    - Add missing test items (from test-reviewer)
    - Simplify over-engineered steps (from simplification-analyst)
    - Adopt existing patterns or add refactoring steps (from precedent-scanner)
+   - Address data concerns or add data verification steps (from data-analyst)
 5. Append a "Slow Analysis Notes" section listing all findings with:
    - Finding ID, severity, description
    - Disposition: addressed | merged (with other finding ID) | downgraded (from original severity)
